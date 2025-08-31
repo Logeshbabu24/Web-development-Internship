@@ -1,45 +1,201 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Logeshbabu Portfolio</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Joke Machine</title>
   <style>
-    body { font-family: sans-serif; margin: 0; background: #f4f4f4; }
-    header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
-    nav a { margin: 0 15px; color: white; text-decoration: none; }
-    section { padding: 20px; max-width: 800px; margin: auto; background: white; margin-top: 20px; border-radius: 10px; }
-    @media(max-width: 600px) { nav a { display: block; margin: 10px 0; } }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .carousel {
+      width: 100%;
+      max-width: 600px;
+      height: 200px;
+      position: relative;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .carousel img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .carousel img.active { opacity: 1; }
+
+    .joke-box {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .joke-box h2 {
+      color: #333;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+    }
+
+    .joke-text {
+      font-size: 1.1rem;
+      line-height: 1.5;
+      color: #555;
+      min-height: 60px;
+      margin: 1rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .joke-btn {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .joke-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .joke-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .counter {
+      background: #667eea;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 2rem; }
+      .carousel { height: 150px; }
+      .joke-box { padding: 1.5rem; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Logeshbabu M</h1>
-    <nav>
-      <a href="#about">About</a>
-      <a href="#projects">Projects</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
+  <div class="header">
+    <h1>🎭 Joke Machine</h1>
+  </div>
 
-  <section id="about">
-    <h2>About Me</h2>
-    <p>I'm a 4th-year ECE student at Panimalar Engineering College with a passion for tech and front-end development. I'm currently interning at ApexPlanet and exploring real-world web projects.</p>
-  </section>
+  <div class="carousel">
+    <img src="https://via.placeholder.com/600x200/FF6B6B/FFFFFF?text=😂+Comedy" class="active" alt="Comedy">
+    <img src="https://via.placeholder.com/600x200/4ECDC4/FFFFFF?text=🤣+Humor" alt="Humor">
+    <img src="https://via.placeholder.com/600x200/45B7D1/FFFFFF?text=😄+Jokes" alt="Jokes">
+  </div>
 
-  <section id="projects">
-    <h2>Projects</h2>
-    <ul>
-      <li>2D CNC plotter – Arduino </li>
-      <li>Gas & Smoke detector using Arduino</li>
-      <li>To-Do List with Local Storage</li>
-    </ul>
-  </section>
+  <div class="joke-box">
+    <h2>Daily Jokes</h2>
+    <div class="counter">Jokes: <span id="count">0</span></div>
+    <div class="joke-text" id="joke">Click the button to get a joke!</div>
+    <button class="joke-btn" id="btn" onclick="getJoke()">Get New Joke</button>
+  </div>
 
-  <section id="contact">
-    <h2>Contact</h2>
-    <p>Email: mlogeshbabu.2004@gmail.com</p>
-    <p>LinkedIn: <a href="https://www.linkedin.com/in/logeshbabu-m-340a6625a" target="_blank">My Profile</a></p>
-  </section>
+  <script>
+    let slideIndex = 0;
+    let jokeCount = 0;
+    let isLoading = false;
+    
+    const images = document.querySelectorAll('.carousel img');
+    
+    // Carousel auto-slide
+    setInterval(() => {
+      images[slideIndex].classList.remove('active');
+      slideIndex = (slideIndex + 1) % images.length;
+      images[slideIndex].classList.add('active');
+    }, 3000);
+
+    // Fetch joke function
+    async function getJoke() {
+      if (isLoading) return;
+      
+      isLoading = true;
+      const jokeEl = document.getElementById('joke');
+      const btnEl = document.getElementById('btn');
+      const countEl = document.getElementById('count');
+      
+      jokeEl.textContent = 'Loading...';
+      btnEl.disabled = true;
+      btnEl.textContent = 'Loading...';
+      
+      try {
+        const response = await fetch('https://official-joke-api.appspot.com/random_joke');
+        
+        if (!response.ok) {
+          throw new Error('Network error');
+        }
+        
+        const data = await response.json();
+        
+        // Check if we got valid joke data
+        if (!data.setup || !data.punchline) {
+          throw new Error('Invalid joke data');
+        }
+        
+        setTimeout(() => {
+          jokeEl.innerHTML = '<strong>' + data.setup + '</strong><br>😂 ' + data.punchline;
+          jokeCount++;
+          countEl.textContent = jokeCount;
+          btnEl.disabled = false;
+          btnEl.textContent = 'Get Another Joke';
+          isLoading = false;
+        }, 500);
+        
+      } catch (error) {
+        console.error('Joke fetch error:', error);
+        setTimeout(() => {
+          // Provide a fallback joke
+          jokeEl.innerHTML = '<strong>Why don\'t scientists trust atoms?</strong><br>😂 Because they make up everything!';
+          jokeCount++;
+          countEl.textContent = jokeCount;
+          btnEl.disabled = false;
+          btnEl.textContent = 'Get Another Joke';
+          isLoading = false;
+        }, 500);
+      }
+    }
+  </script>
 </body>
 </html>
